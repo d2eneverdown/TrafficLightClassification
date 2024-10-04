@@ -15,7 +15,8 @@ def predict_yolov8(img_folder_path):
     # 加载模型和标签
     target_label = 'traffic light'
     traffic_light_img = []
-    model = load_yolov8_model('yolov8n.pt')
+    # model = load_yolov8_model('yolov8n.pt')
+    model = load_yolov8_model('traffic_light_yolov8n.pt')
     
     # 创建输出文件夹（如果不存在的话）
     output_folder = 'output'
