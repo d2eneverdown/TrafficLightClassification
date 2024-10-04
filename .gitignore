@@ -1,1 +1,3 @@
 dataset/*
+train_yolo/output_labels
+train_yolo/runs/*
