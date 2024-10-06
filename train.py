@@ -5,7 +5,7 @@ from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras import callbacks
 
 import util
-from models import create_cnn
+from models import SimpleCNN
 
 target_classes = ['go', 'stop', 'warning']
 color_map = {
@@ -60,7 +60,8 @@ x_train = x_train.reshape(-1,100,100,3)
 x_test = x_test.reshape(-1,100,100,3)
 
 input_shape = (100,100,3)
-model = create_cnn(input_shape)
+
+model = SimpleCNN(input_shape)
 model.compile(
     optimizer = 'adam',
     loss = 'sparse_categorical_crossentropy',

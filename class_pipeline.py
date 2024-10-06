@@ -14,14 +14,14 @@ from realesrgan import RealESRGANer
 def predict_yolov8(img_folder_path):
     # 加载模型和标签
     target_label = 'traffic light'
-    traffic_light_img = []
+    traffic_light_images = []
     # model = load_yolov8_model('yolov8n.pt')
     model = load_yolov8_model('traffic_light_yolov8n.pt')
     
-    # 创建输出文件夹（如果不存在的话）
-    output_folder = 'output'
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    # # 创建输出文件夹（如果不存在的话）
+    # output_folder = 'output'
+    # if not os.path.exists(output_folder):
+    #     os.makedirs(output_folder)
 
     for img_file in os.listdir(img_folder_path):
         img_path = os.path.join(img_folder_path, img_file)
@@ -39,16 +39,16 @@ def predict_yolov8(img_folder_path):
                 image = Image.open(img_path)
                 cropped_image = image.crop((x1, y1, x2, y2))
                 
-                # 使用序号为裁剪图像命名
-                cropped_image_path = os.path.join(output_folder, f"{os.path.splitext(img_file)[0]}_cropped_{idx}.png")
-                
-                # 保存裁剪后的图像
-                cropped_image.save(cropped_image_path)
-                
-                # 将裁剪图像的路径添加到列表
-                traffic_light_img.append(cropped_image_path)
+                traffic_light_images.append(cropped_image)
 
-    return traffic_light_img  # 返回包含裁剪后图像地址的列表
+                # # 使用序号为裁剪图像命名
+                # cropped_image_path = os.path.join(output_folder, f"{os.path.splitext(img_file)[0]}_cropped_{idx}.png")
+                # # 保存裁剪后的图像
+                # cropped_image.save(cropped_image_path)
+                # # 将裁剪图像的路径添加到列表
+                # traffic_light_images.append(cropped_image_path)
+
+    return traffic_light_images  # 返回包含裁剪后图像地址的列表
 
 def predict_easy_cnn(img_folder_path):
     # 加载模型和标签
@@ -86,18 +86,28 @@ def img_SR(img_list):
         model=model,
         half=False,
     )
-    os.makedirs('realesrgan_output',exist_ok=True)
+    os.makedirs('/output/realesrgan_output',exist_ok=True)
 
-    paths = img_list
-    for idx,path in enumerate(paths):
-        imgname,extension = os.path.splitext(os.path.basename(path))
-        print(f"Processing SR {imgname}...")
-        img = cv2.imread(path,cv2.IMREAD_UNCHANGED)
-        output,_ = upsamples.enhance(img,outscale=4)
-        save_path = os.path.join('realesrgan_output',f'{imgname}_out.{extension}')
-        cv2.imwrite(save_path,output)
+    for idx,cropped_image in enumerate(img_list):
+        img_array = np.array(cropped_image)
+        output,_ = upsamples.enhance(img_array,outscale=4)
+        padded_img = pad_img2square(output)
+        save_path = os.path.join('realesrgan_output', f'SRout_{idx}.png')
+        cv2.imwrite(save_path, padded_img)
         print(f'Saved to {save_path}')
+
         SR_img.append(save_path)
+
+    # paths = img_list
+    # for idx,path in enumerate(paths):
+    #     imgname,extension = os.path.splitext(os.path.basename(path))
+    #     print(f"Processing SR {imgname}...")
+    #     img = cv2.imread(path,cv2.IMREAD_UNCHANGED)
+    #     output,_ = upsamples.enhance(img,outscale=4)
+    #     save_path = os.path.join('realesrgan_output',f'{imgname}_out.{extension}')
+    #     cv2.imwrite(save_path,output)
+    #     print(f'Saved to {save_path}')
+    #     SR_img.append(save_path)
     return SR_img
 
 def pad_img2square(img):
@@ -122,22 +132,8 @@ def main():
     traffic_img =predict_yolov8('predict_data/test1')
     print((traffic_img))
     SR_img =  img_SR(traffic_img)
-    predict_list = []
-    for idx,img in enumerate(SR_img):
-        img = cv2.imread(img)
-        img = pad_img2square(img)
-        cv2.imwrite(f"pad_output/SR_img_{idx}.png",img)
-        predict_list.append(f"pad_output/SR_img_{idx}.png")
-    
     # 使用模型进行预测
     predict_easy_cnn('pad_output')
-
-
-    
-
-    
-        
-
 
 
 if __name__ == '__main__':

@@ -2,4 +2,4 @@ train: /Users/dubaoze/Workspace/Traffic_Light_Classification/train_yolo/train_da
 val: /Users/dubaoze/Workspace/Traffic_Light_Classification/train_yolo/train_data
 
 nc: 3
-names: ['go','stop','warning']
+names: ['warning','go','stop']
